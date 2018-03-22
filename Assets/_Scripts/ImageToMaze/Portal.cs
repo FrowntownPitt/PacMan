@@ -5,25 +5,16 @@ using UnityEngine;
 public class Portal : MonoBehaviour {
 
     private List<Portal> portals;
-
-	// Use this for initialization
-	void Start () {
-		
-	}
-
+    
+    // Gain access to all other portals
     public void AddPortals(List<Portal> p)
     {
         portals = p;
     }
 
+    // Pick a random portal to go to
     public Portal GetRandomPortal()
     {
         return portals[Random.Range(0, portals.Count)];
     }
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-    
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// Generic tile object.  Individual cell in the "image" maze.
 public class MazeTile : MonoBehaviour {
 
     public GameObject wallCenter;
@@ -127,9 +128,4 @@ public class MazeTile : MonoBehaviour {
                 break;
         }
     }
-
-	// Update is called once per frame
-	void Update () {
-		
-	}
 }

@@ -43,9 +43,10 @@ namespace Player
             {
                 Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                 RaycastHit hit;
-                if (Physics.Raycast(ray, out hit))
+                if (Physics.Raycast(ray, out hit))  // Find the location of the click on the floor
                 {
                     NavMeshHit navHit;
+                    // Get the nearest navmesh location
                     if (NavMesh.SamplePosition(hit.point, out navHit, 100, NavMesh.AllAreas))
                     {
                         //Debug.Log(hit.transform.position + ", " + navHit.position);
@@ -61,6 +62,7 @@ namespace Player
 
         private void OnTriggerEnter(Collider other)
         {
+            // On portal entry, go to a random other portal
             if (!warping && other.CompareTag("Portal"))
             {
                 //Debug.Log("Entered Portal");

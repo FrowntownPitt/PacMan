@@ -14,6 +14,7 @@ public class PlayAgainButton : MonoBehaviour {
         btn.onClick.AddListener(ResetScene);
     }
 
+    // Reload the current scene (play again)
     void ResetScene()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);

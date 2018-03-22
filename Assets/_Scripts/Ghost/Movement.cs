@@ -8,11 +8,11 @@ namespace Ghost
     public class Movement : MonoBehaviour
     {
 
-        NavMeshAgent agent;
+        NavMeshAgent agent; // this ghost's agent
 
         bool warping = false;
 
-        List<Vector3> destinations;
+        List<Vector3> destinations; // Queue of waypoints
 
         public float approachDistance;
 
@@ -28,6 +28,7 @@ namespace Ghost
         // Update is called once per frame
         void Update()
         {
+            // Once it reaches its target, go to next or stop there
             if(!reachedTarget && Vector3.Magnitude(transform.position - agent.destination) <= approachDistance)
             {
                 if (destinations.Count > 0)
@@ -60,6 +61,7 @@ namespace Ghost
             destinations.Clear();
 
             NavMeshHit hit;
+            // Make sure the target location is on the navmesh
             NavMesh.SamplePosition(position, out hit, 100f, NavMesh.AllAreas);
 
             position = hit.position;
@@ -90,7 +92,7 @@ namespace Ghost
             {
                 destinations = new List<Vector3>();
             }
-            destinations.Add(position);
+            destinations.Add(position); // Add the target to the queue
 
             if (agent == null)
             {
@@ -104,6 +106,7 @@ namespace Ghost
 
         private void OnTriggerEnter(Collider other)
         {
+            // If it reaches a portal, warp to a random other portal
             if (!warping && other.CompareTag("Portal"))
             {
                 Debug.Log("Entered Portal");
@@ -112,8 +115,10 @@ namespace Ghost
                 agent.isStopped = true;
                 agent.ResetPath();
 
+                // Make sure it doesn't warp again after it warps in to another trigger
                 warping = true;
 
+                // Make sure we warp into a valid navmesh location
                 WarpToLocation(p.GetRandomPortal().transform.position);
                 //agent.Warp(p.GetRandomPortal().transform.position);
 

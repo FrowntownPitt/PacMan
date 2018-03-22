@@ -8,7 +8,17 @@ namespace I2M
     public class Generator : MonoBehaviour
     {
 
-        public Texture2D mazeImage;
+        /**
+         * This will generate a maze by an image.  
+         * (255, 255, 255) - Floor, PacDot
+         * (255, 0, 0)     - Portal
+         * (0, 255, 0)     - Player Spawn
+         * (0, 0, 255)     - Power Pellet
+         * (192, 192, 192) - Ghost spawn (1 ghost per pixel)
+         * (0, 0, 0)       - Walls
+         */
+
+        public Texture2D mazeImage; // Image in Assets to generate the maze from.
 
         public Vector2Int imageSize;
 
@@ -24,6 +34,7 @@ namespace I2M
         MazeTile[,] tiles;
 
         public float colorTolerance;
+
         // Floor, Wall, EnemySpawn
         public Color[] imageColors;
 
@@ -48,6 +59,7 @@ namespace I2M
             floor.transform.localScale = new Vector3((float)imageSize.x / 10, 1, (float)imageSize.y / 10);
             floor.transform.position = new Vector3((float)(imageSize.x-1) / 2, 0, (float)(imageSize.y-1) / 2);
 
+            // Get the pixels from the texture
             pixels = new Color[imageSize.x, imageSize.y];
             for (int x = 0; x < imageSize.x; x++)
             {
@@ -60,9 +72,11 @@ namespace I2M
             //for(int i=0; i<imageColors.Length; i++)
             //    Debug.Log(imageColors[i]);
 
+            // Generate the maze (extremely costly, run in background)
             StartCoroutine(GenerateMaze());
         }
 
+        // See if the colors are within tolerance of each other
         bool CompareColors(Color c1, Color c2)
         {
             if (Mathf.Abs(c1.r - c2.r) < colorTolerance &&
@@ -82,6 +96,7 @@ namespace I2M
                 playerInstance = Instantiate(playerPrefab);
                 playerInstance.transform.position = new Vector3(x, 0, z);
 
+                // Enable navmesh after moving the player, to avoid navmesh/transform bugs
                 playerInstance.GetComponent<NavMeshAgent>().enabled = true;
 
                 playerInstance.GetComponent<Player.Movement>().SetSpawn(playerInstance.transform.position);
@@ -99,7 +114,7 @@ namespace I2M
             //    navMeshGenerator.AddSurface(floorObjects[i]);
             //}
 
-            navMeshGenerator.Bake();
+            navMeshGenerator.Bake(); // Dynamically bake the floor navmesh (walls are obstacles)
 
             List<Portal> portals = new List<Portal>();
 
@@ -116,6 +131,7 @@ namespace I2M
 
                     //Debug.Log(tile.name);
 
+                    // Move tile to its position
                     tile.transform.localPosition = new Vector3(x, 0, y) * tile.transform.localScale.x;
 
                     Color c = pixels[x, y];
@@ -123,7 +139,7 @@ namespace I2M
                     {
                         tile.SetTileType(MazeTile.TileType.PacDot);
                         pacDots++;
-                        // Floor
+                        // Floor/PacDot
                     }
                     else if (CompareColors(c, imageColors[1]))
                     {
@@ -164,6 +180,7 @@ namespace I2M
                     }
                     else
                     {
+                        // Not a color we expect.  Do nothing (treat it like an empty floor)
                         //Debug.Log("Odd color: " + c.r + " "+ c.g + " " + c.b + " at " + tile.name);
                     }
                     //tile.ToggleWall(false);
@@ -176,6 +193,8 @@ namespace I2M
                 }
             }
 
+            // Enable the walls
+            // They are smaller than the squares, so to make walls contiguous there are N/S/E/W half-walls
             for(int x=0; x<imageSize.x; x++)
             {
                 for(int y=0; y<imageSize.y; y++)
@@ -205,11 +224,13 @@ namespace I2M
                 }
             }
 
-
+            // Spawn the player wherever the tile was
             SpawnPlayer(playerSpawn.x, playerSpawn.z);
 
             List<Ghost.Controller> ghosts = new List<Ghost.Controller>();
 
+
+            // Make the ghosts and update the game manager
             GameManager gm = FindObjectOfType<GameManager>();
             gm.SetTotalPacDots(pacDots);
             gm.InitGhosts();
@@ -224,7 +245,7 @@ namespace I2M
 
                 Ghost.Controller gc = ghost.GetComponent<Ghost.Controller>();
 
-
+                // Pick a random ghost
                 gc.SetGhostType((Ghost.Controller.GhostType)x);
                 gc.area = new Vector2(imageSize.x, imageSize.y);
                 gc.SetSpawn(ghost.transform.position);
@@ -241,7 +262,7 @@ namespace I2M
                 gc.SetRandomDestination();
             }
             
-
+            // Give all portals access to all portals
             for(int i=0; i<portals.Count; i++)
             {
                 portals[i].AddPortals(portals);

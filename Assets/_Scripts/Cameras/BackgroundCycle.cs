@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// Cycle the background color
 public class BackgroundCycle : MonoBehaviour {
 
     public float time;
@@ -18,11 +19,13 @@ public class BackgroundCycle : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        // Take <time> time to cycle through the colors (by shifting the hue)
         hsbc.h = (hsbc.h + Time.deltaTime / time) % 1.0f;
         camera.backgroundColor = HSBColor.ToColor(hsbc);
     }
 }
 
+// Found implementation online for HSB color cycling.
 [System.Serializable]
 public struct HSBColor
 {

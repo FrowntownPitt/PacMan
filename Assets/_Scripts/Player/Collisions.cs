@@ -14,6 +14,7 @@ public class Collisions : MonoBehaviour {
 
             Ghost.Controller ghost = other.GetComponent<Ghost.Controller>();
 
+            // If its frightened, eat him
             if(ghost.ghostMode == Ghost.Controller.GhostMode.Frightened)
             {
                 //Debug.Log("Eat");
@@ -23,7 +24,7 @@ public class Collisions : MonoBehaviour {
                 gm.UpdateScore(10);
 
                 ghost.Die();
-            } else
+            } else // Otherwise the player dies
             {
                 //Debug.Log("Die");
                 FindObjectOfType<I2M.GameManager>().KillPlayer();
